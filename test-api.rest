@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:8000
+
+### Register User
+POST {{baseUrl}}/api/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+
+### Login User
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Get Profile (use token from login response)
+GET {{baseUrl}}/api/profile
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Logout
+POST {{baseUrl}}/api/logout
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Refresh Token
+POST {{baseUrl}}/api/refresh-token
+Authorization: Bearer YOUR_TOKEN_HERE
