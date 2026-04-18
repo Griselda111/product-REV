@@ -39,7 +39,7 @@ Route::get('/dashboard', [MemberDashboardController::class, 'index'])
     ->name('dashboard');
 
 //form action login
-Route::post('/login', [UserController::class, 'loginweb'])->name('login');
+Route::post('/login', [UserController::class, 'loginweb'])->name('loginweb');
 //form action register
 Route::post('/register', [UserController::class, 'register'])->name('register.store');
 
