@@ -64,6 +64,7 @@
                 <th>NO</th>
                 <th>Kode Order</th>
                 <th>Nama Pemesan</th>
+                <th>Nama Kemasan</th>
                 <th>Jasa</th>
                 <th>Total Tagihan</th>
                 <th>Sisa Tagihan</th>
@@ -74,14 +75,14 @@
             </thead>
             <tbody>
               @forelse ($orders as $order)
-                @php($sisaTagihan = round((float) $order->total_tagihan - (float) $order->dp_amount, 2))
                 <tr class="text-center" style="font-size:13px">
                   <td>{{ $loop->iteration }}</td>
                   <td>{{ $order->kode_order }}</td>
                   <td>{{ $order->nama_pemesan }}</td>
+                  <td>{{ $order->nama_kemasan ?? '-' }}</td>
                   <td>{{ $order->jasa->nama_jasa ?? '-' }}</td>
-                  <td>Rp {{ $order->total_tagihan == (int)$order->total_tagihan ? number_format($order->total_tagihan, 0, ',', '') : number_format($order->total_tagihan, 2, ',', '') }}</td>
-                  <td>Rp {{ $sisaTagihan == (int)$sisaTagihan ? number_format($sisaTagihan, 0, ',', '') : number_format($sisaTagihan, 2, ',', '') }}</td>
+                  <td>Rp {{ number_format($order->total_tagihan, 0, ',', '.') }}</td>
+                  <td>Rp {{ number_format($order->total_tagihan - $order->dp_amount, 0, ',', '.') }}</td>
                   <td>{{ $order->status_pembayaran_label }}</td>
                   <td>{{ $order->status_produksi_label }}</td>
                   <td class="align-middle">
@@ -99,95 +100,258 @@
                 <div class="modal fade jasa-edit-modal" id="modalDetailOrder{{ $order->id }}" tabindex="-1" aria-hidden="true">
                   <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content">
-                      <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title">Detail Order {{ $order->kode_order }}</h5>
+
+                      <!-- Header -->
+                      <div class="modal-header border-bottom">
+                        <h5 class="modal-title fw-bold">Detail Order <span class="text-primary">{{ $order->kode_order }}</span></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
+
+                      <!-- Body -->
                       <div class="modal-body">
-                        <div class="row g-3">
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">ID Customer</div>
-                            <div class="fw-bold">{{ $order->id_customer }}</div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Nama Pemesan</div>
-                            <div class="fw-bold">{{ $order->nama_pemesan }}</div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Tanggal Pesan</div>
-                            <div>{{ $order->tanggal_pesan?->format('d/m/Y') ?? '-' }}</div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Target Selesai</div>
-                            <div>{{ $order->tanggal_target_selesai?->format('d/m/Y') ?? '-' }}</div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Jasa</div>
-                            <div>{{ $order->jasa->nama_jasa ?? '-' }}</div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Tarif</div>
-                            <div>Rp {{ $order->tarif == (int)$order->tarif ? number_format($order->tarif, 0, ',', '') : number_format($order->tarif, 2, ',', '') }}</div>
-                          </div>
-                          <div class="col-md-12">
-                            <div class="row g-2 align-items-stretch">
-                              <div class="col-md-4">
-                              <div class="detail-card h-100">
-                                <div class="detail-label">Ukuran</div>
-                                <div class="detail-value">{{ $order->ukuran }}</div>
-                              </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="detail-card h-100">
-                                  <div class="detail-label">Jumlah</div>
-                                  <div class="detail-value">{{ $order->jumlah }}</div>
+                        <div class="row g-4">
+
+                          <!-- ================= CUSTOMER ================= -->
+                          <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                              <h6 class="fw-bold mb-3 text-primary">Informasi Customer</h6>
+                              <div class="row g-1">
+                                <div class="col-md-3">
+                                  <small class="text-muted">ID Customer</small>
+                                  <div class="fw-bold">{{ $order->id_customer }}</div>
                                 </div>
-                              </div>
-                            <div class="col-md-4">
-                                <div class="detail-card h-100 highlight">
-                                  <div class="detail-label">Total Tagihan</div>
-                                  <div class="detail-value">Rp {{ $order->total_tagihan == (int)$order->total_tagihan ? number_format($order->total_tagihan, 0, ',', '') : number_format($order->total_tagihan, 2, ',', '') }}</div>
+                                <div class="col-md-3">
+                                  <small class="text-muted">Nama Pemesan</small>
+                                  <div class="fw-bold">{{ $order->nama_pemesan }}</div>
+                                </div>
+                                <div class="col-md-3">
+                                  <small class="text-muted">Kemasan</small>
+                                  <div class="fw-bold">{{ $order->nama_kemasan ?? '-' }}</div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Status Pembayaran</div>
-                            <div>{{ $order->status_pembayaran_label }}</div>
+
+                          <!-- ================= TANGGAL ================= -->
+                          <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                              <h6 class="fw-bold mb-3 text-primary">Timeline</h6>
+                              <div class="row g-1">
+                                <div class="col-md-6">
+                                  <small class="text-muted">Tanggal Pesan</small>
+                                  <div>{{ $order->tanggal_pesan?->format('d M Y') ?? '-' }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                  <small class="text-muted">Target Selesai</small>
+                                  <div>{{ $order->tanggal_target_selesai?->format('d M Y') ?? '-' }}</div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Status Produksi</div>
-                            <div>{{ $order->status_produksi_label }}</div>
+
+                          <!-- ================= DESAIN ================= -->
+                          <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                              <h6 class="fw-bold mb-3 text-primary">Desain</h6>
+                              <div class="row g-2">
+                                <div class="col-md-6">
+                                  <small class="text-muted">Kondisi</small>
+                                  <div>{{ $order->kondisi_desain_label }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                  <small class="text-muted">Status</small>
+                                  <div>{{ $order->status_desain_label }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                  <small class="text-muted">File Customer</small><br>
+                                  @if($order->file_desain_customer)
+                                    <a href="{{ asset('storage/' . $order->file_desain_customer) }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                                      Lihat File
+                                    </a>
+                                  @else
+                                    -
+                                  @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Mockup</small><br>
+                                  @if($order->file_mockup)
+                                    <a href="{{ asset('storage/' . $order->file_mockup) }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                                      Lihat File
+                                    </a>
+                                  @else
+                                    -
+                                  @endif
+                                </div>
+                                <div class="col-md-6">
+                                  <small class="text-muted">Catatan Revisi</small>
+                                  <div class="mt-1">{{ $order->catatan_revisi ?? '-' }}</div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">DP Dibayar</div>
-                            <div>Rp {{ $order->dp_amount == (int)$order->dp_amount ? number_format($order->dp_amount, 0, ',', '') : number_format($order->dp_amount, 2, ',', '') }}</div>
+
+                          <!-- ================= JASA ================= -->
+                          <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                              <h6 class="fw-bold mb-3 text-primary">Detail Jasa</h6>
+                              <div class="row g-2">
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Jasa</small>
+                                  <div class="fw-semibold">{{ $order->jasa->nama_jasa ?? '-' }}</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Tarif</small>
+                                  <div class="fw-semibold text-success">
+                                    Rp {{ number_format($order->tarif, 0, ',', '.') }}
+                                  </div>
+                                </div>
+
+                                <!-- DETAIL BOX -->
+                                <div class="col-md-4">
+                                  <div class="p-3 border rounded-3 text-center bg-white">
+                                    <small class="text-muted">Ukuran</small>
+                                    <div class="fw-bold fs-6 d-flex align-items-center justify-content-center" style="min-height:35px;"> <!-- UPDATED -->
+                                      {{ $order->ukuran ?? '-' }}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                  <div class="p-3 border rounded-3 text-center bg-white">
+                                    <small class="text-muted">Jumlah</small>
+                                    <div class="fw-bold fs-6 d-flex align-items-center justify-content-center" style="min-height:35px;"> <!-- UPDATED -->
+                                      {{ $order->jumlah ?? '-' }}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                  <div class="p-3 rounded-3 text-center bg-white shadow-sm border border-primary-subtle">
+                                    <small class="text-primary fw-semibold">Total</small> <!-- UPDATED -->
+                                    <div class="fw-bold text-primary fs-5 d-flex align-items-center justify-content-center" style="min-height:35px;"> <!-- UPDATED -->
+                                      {{ $order->total_tagihan ? 'Rp ' . number_format($order->total_tagihan, 0, ',', '.') : '-' }}
+                                    </div>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
                           </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Sisa Tagihan</div>
-                            <div>Rp {{ $sisaTagihan == (int)$sisaTagihan ? number_format($sisaTagihan, 0, ',', '') : number_format($sisaTagihan, 2, ',', '') }}</div>
+
+
+                          <!-- ================= PEMBAYARAN ================= -->
+                          <div class="card border-0 shadow-sm mb-3"> <!-- UPDATED -->
+                            <div class="card-body"> <!-- UPDATED -->
+                              <h6 class="fw-bold mb-3 text-primary">Pembayaran</h6> <!-- UPDATED -->
+                              <div class="row g-2"> <!-- UPDATED -->
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Status Pembayaran</small>
+                                  <div class="fw-semibold"> <!-- UPDATED -->
+                                    {{ $order->status_pembayaran_label }}
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Jenis Pembayaran</small>
+                                  <div class="fw-semibold"> <!-- UPDATED -->
+                                    {{ $order->jenis_pembayaran_label}}
+                                  </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                  <small class="text-muted">Bukti Transfer</small>
+                                  <div class="mt-1"> <!-- UPDATED -->
+                                    @if($order->bukti_transfer)
+                                      <a href="{{ asset('storage/' . $order->bukti_transfer) }}" target="_blank" class="btn btn-sm btn-outline-primary"> <!-- UPDATED -->
+                                        Lihat File
+                                      </a>
+                                    @else
+                                      -
+                                    @endif
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6"> <!-- UPDATED -->
+                                  <div class="p-3 border rounded-3 text-center bg-white"> <!-- UPDATED -->
+                                    <small class="text-muted">DP Dibayar</small>
+                                    <div class="fw-bold text-success"> <!-- UPDATED -->
+                                      Rp {{ number_format($order->dp_amount, 0, ',', '.') }}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6"> <!-- UPDATED -->
+                                  <div class="p-3 border rounded-3 text-center bg-white"> <!-- UPDATED -->
+                                    <small class="text-muted">Sisa Tagihan</small>
+                                    <div class="fw-bold text-danger"> <!-- UPDATED -->
+                                      Rp {{ number_format($order->total_tagihan - $order->dp_amount, 0, ',', '.') }}
+                                    </div>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
                           </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Tanggal Mulai Proses</div>
-                            <div>{{ $order->tanggal_mulai_proses?->format('d/m/Y') ?? '-' }}</div>
+
+                          <!-- ================= PRODUKSI ================= -->
+                          <div class="card border-0 shadow-sm mb-3"> <!-- UPDATED -->
+                            <div class="card-body"> <!-- UPDATED -->
+                              <h6 class="fw-bold mb-3 text-primary">Produksi</h6> <!-- UPDATED -->
+                              <div class="row g-2"> <!-- UPDATED -->
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Status Produksi</small>
+                                  <div class="fw-semibold"> <!-- UPDATED -->
+                                    {{ $order->status_produksi_label }}
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Tanggal Mulai Proses</small>
+                                  <div>
+                                    {{ $order->tanggal_mulai_proses?->format('d/m/Y') ?? '-' }}
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Tanggal Selesai Proses</small>
+                                  <div>
+                                    {{ $order->tanggal_selesai_proses?->format('d/m/Y') ?? '-' }}
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <small class="text-muted">Tanggal Diambil</small>
+                                  <div>
+                                    {{ $order->tanggal_diambil?->format('d/m/Y') ?? '-' }}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Tanggal Selesai Proses</div>
-                            <div>{{ $order->tanggal_selesai_proses?->format('d/m/Y') ?? '-' }}</div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="fw-semibold text-muted small">Tanggal Diambil</div>
-                            <div>{{ $order->tanggal_diambil?->format('d/m/Y') ?? '-' }}</div>
-                          </div>
-                          <div class="col-md-12">
-                            <div class="fw-semibold text-muted small">Catatan</div>
-                            <div>{{ $order->catatan ?? '-' }}</div>
+
+                          <!-- ================= CATATAN ================= -->
+                          <div class="card border-0 shadow-sm"> <!-- UPDATED -->
+                            <div class="card-body"> <!-- UPDATED -->
+                              <h6 class="fw-bold mb-2 text-primary">Catatan</h6> <!-- UPDATED -->
+                              <div class="text-muted"> <!-- UPDATED -->
+                                {{ $order->catatan ?? '-' }}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
+                      <!-- Footer -->
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                          Tutup
+                        </button>
                       </div>
+
                     </div>
                   </div>
                 </div>

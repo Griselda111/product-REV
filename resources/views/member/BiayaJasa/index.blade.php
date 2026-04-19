@@ -74,7 +74,7 @@
               <tr class="text-center" style="font-size:13px">
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $jasa->nama_jasa }}</td>
-                <td>Rp {{ number_format($jasa->tarif, 0, ',', '.') }}</td>
+                <td>Rp {{ $jasa->tarif == (int)$jasa->tarif ? number_format($jasa->tarif, 0, ',', '') : number_format($jasa->tarif, 2, ',', '') }}</td>
                 <td>{{ $jasa->keterangan ?? '-' }}</td>
                 <td class="align-middle text-muted">Read only</td>
               </tr>
